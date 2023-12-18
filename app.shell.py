@@ -25,6 +25,7 @@ st.set_page_config(page_title="Impact Theory",
 ##############
 # START CODE #
 ##############
+
 data_path = './data/impact_theory_data.json'
 ## RETRIEVER
 client = WeaviateClient(weaviate_api_key, weaviate_url)
@@ -48,6 +49,7 @@ index_name = 'Impact_theory_minilm_256'
 ##############
 #  END CODE  #
 ##############
+
 data = load_data(data_path)
 #creates list of guests for sidebar
 guest_list = sorted(list(set([d['guest'] for d in data])))
@@ -118,10 +120,10 @@ def main():
                 #creates container for LLM response
                 chat_container, response_box = [], st.empty()
                 
-                # execute chat call to LLM
-                ##############
-                # START CODE #
-                ##############
+            # execute chat call 
+            ##############
+            # START CODE #
+            ##############
                 for resp in llm.get_chat_completion(prompt=prompt,
                                     temperature=temperature_input,
                                     max_tokens=350,
@@ -137,20 +139,34 @@ def main():
                     except Exception as e:
                         print(e)
                         continue
-                ##############
-                #  END CODE  #
-                ##############
+            ##############
+            #  END CODE  #
+            ##############
+
+
             ##############
             # START CODE #
             ##############
+            # Unique IDs
+            seen_ids = set()
+
+            # Unique ID list
+            unique_data = []
+
+            for item in valid_response:
+                # It detects if the ID was already return
+                if item["doc_id"] not in seen_ids:
+                    # Add only new IDs
+                    unique_data.append(item)
+                    seen_ids.add(item["doc_id"])
             st.subheader("Search Results")
-            for i, hit in enumerate(valid_response):
+            for i, hit in enumerate(unique_data):
                 col1, col2 = st.columns([7, 3], gap='large')
-                image = hit['thumbnail_url']  # get thumbnail_url
-                episode_url = hit['episode_url']  # get episode_url
-                title = hit['title']  # get title
-                show_length = hit['length']  # get length
-                time_string = convert_seconds(show_length)  # convert show_length to readable time string
+                image = hit['thumbnail_url']  
+                episode_url = hit['episode_url'] 
+                title = hit['title']  
+                show_length = hit['length'] 
+                time_string = convert_seconds(show_length)
             ##############
             #  END CODE  #
             ##############
@@ -164,8 +180,7 @@ def main():
                             unsafe_allow_html=True)
                     st.write('\n\n')
                 with col2:
-                    # st.write(f"<a href={episode_url} <img src={image} width='200'></a>", 
-                    #             unsafe_allow_html=True)
+ 
                     st.image(image, caption=title.split('|')[0], width=200, use_column_width=False)
 
 if __name__ == '__main__':
